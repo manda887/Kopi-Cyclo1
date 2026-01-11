@@ -1,2 +1,185 @@
 # Kopi-Cyclo1
 Sistem Kasir Glass Edition
+[!DOCTYPE html.txt](https://github.com/user-attachments/files/24547774/DOCTYPE.html.txt)
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coffee Dashboard ($)</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #0a0f1f;
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+  }
+  .container { max-width: 1000px; margin: auto; }
+  h2 {
+    text-align: center;
+    font-size: 30px;
+    background: linear-gradient(90deg, #00eaff, #0066ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 30px;
+  }
+  .card {
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(12px);
+    padding: 22px;
+    border-radius: 18px;
+    border: 1px solid rgba(0,255,255,0.25);
+    box-shadow: 0 0 25px rgba(0,255,255,0.12);
+    margin-bottom: 25px;
+  }
+  .input-panel {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  input {
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    width: 280px;
+    outline: none;
+    font-size: 15px;
+    background: #fff;
+    color: #000;
+  }
+  button {
+    padding: 14px 22px;
+    border-radius: 10px;
+    border: none;
+    background: #0066ff;
+    color: #fff;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  button:hover {
+    background: #00eaff;
+    color: #000;
+    box-shadow: 0 0 18px #00eaff;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  th { background: rgba(0,255,255,0.15); }
+  th, td { padding: 16px; text-align: center; }
+  tr:hover { background: rgba(0,255,255,0.07); }
+  .paid { color: #00ff9d; font-weight: 600; }
+  .unpaid { color: #ff4f81; }
+  .btn-delete { background:#ff004c; }
+  .btn-delete:hover { background:#ff4f81; color:#fff; box-shadow:0 0 12px #ff4f81; }
+  .btn-paid { background:#00c853; color:#000; }
+  .btn-paid:hover { background:#00ff9d; color:#000; box-shadow:0 0 12px #00ff9d; }
+  tfoot td { font-size:18px; font-weight:600; background:rgba(0,255,255,0.05); }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>☕ Coffee Cyclo</h2>
+
+  <div class="card">
+    <div class="input-panel">
+      <input type="text" id="coffeeName" placeholder="Masukkan Nama Kopi">
+      <input type="number" id="coffeePrice" placeholder="Masukkan Harga ($)">
+      <button onclick="addCoffee()">➕ Tambah Kopi</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama Kopi</th>
+          <th>Harga ($)</th>
+          <th>Status</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="coffeeTable"></tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3">Total Belum Dibayar</td>
+          <td colspan="2" id="total">$0.00</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+
+<script>
+  let coffeeList = JSON.parse(localStorage.getItem("kopi") || "[]");
+
+  function addCoffee() {
+    const name = document.getElementById("coffeeName").value;
+    const price = document.getElementById("coffeePrice").value;
+
+    if (!name || !price) {
+      alert("Harap isi semua data!");
+      return;
+    }
+
+    coffeeList.push({ name, price, paid: false });
+    saveData();
+    renderTable();
+
+    document.getElementById("coffeeName").value = "";
+    document.getElementById("coffeePrice").value = "";
+  }
+
+  function markPaid(index) {
+    coffeeList[index].paid = true;
+    saveData();
+    renderTable();
+  }
+
+  function deleteCoffee(index) {
+    coffeeList.splice(index, 1);
+    saveData();
+    renderTable();
+  }
+
+  function saveData() {
+    localStorage.setItem("kopi", JSON.stringify(coffeeList));
+  }
+
+  function renderTable() {
+    const tableBody = document.getElementById("coffeeTable");
+    tableBody.innerHTML = "";
+    let totalUnpaid = 0;
+
+    coffeeList.forEach((coffee, i) => {
+      tableBody.innerHTML += `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${coffee.name}</td>
+        <td>$${parseFloat(coffee.price).toFixed(2)}</td>
+        <td>${coffee.paid ? "<span class='paid'>Paid</span>" : "<span class='unpaid'>Belum Paid</span>"}</td>
+        <td>
+          ${!coffee.paid ? `<button class='btn-paid' onclick='markPaid(${i})'>Sudah Dibayar</button>` : ""}
+          <button class='btn-delete' onclick='deleteCoffee(${i})'>Hapus</button>
+        </td>
+      </tr>`;
+      if (!coffee.paid) totalUnpaid += +coffee.price;
+    });
+
+    document.getElementById("total").textContent = "$" + totalUnpaid.toFixed(2);
+  }
+
+  renderTable();
+</script>
+
+</body>
+</html>
